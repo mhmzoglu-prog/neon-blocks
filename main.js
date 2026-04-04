@@ -71,6 +71,15 @@ const nameInputContainer = document.getElementById('name-input-container');
 const playerNameInput = document.getElementById('player-name-input');
 const leaderboardUl = document.getElementById('leaderboard-ul');
 
+// New Advanced Mechanics Elements
+const holdBox = document.getElementById('hold-box');
+const heldPieceContainer = document.getElementById('held-piece-container');
+const shuffleBtn = document.getElementById('shuffle-btn');
+
+let heldShape = null;
+let hasUsedShuffle = false;
+const SHUFFLE_COST = 3000;
+
 // Calculate dynamic cell sizes based on CSS
 function getCellSize() {
     const defaultCellSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 40;
@@ -90,10 +99,21 @@ function init() {
     bestScoreEl.innerText = highScore;
     createGrid();
     generatePieces();
-
+    
     restartBtn.addEventListener('click', restartGame);
     leaderboardBtn.addEventListener('click', showLeaderboard);
     closeLeaderboardBtn.addEventListener('click', hideLeaderboard);
+    
+    shuffleBtn.addEventListener('click', () => {
+        if (hasUsedShuffle || score < SHUFFLE_COST) return;
+        score -= SHUFFLE_COST;
+        scoreEl.innerText = score;
+        hasUsedShuffle = true;
+        updateShuffleButton();
+        playSound('clear');
+        generatePieces();
+    });
+    
     window.addEventListener('resize', () => { /* Redraw or resize calculations if needed */ });
 }
 
@@ -216,6 +236,8 @@ let currentShape = null;
 let dragShapeIndex = -1;
 let dragStartX = 0;
 let dragStartY = 0;
+let lastDragX = 0;
+let lastDragY = 0;
 let originalPieceEl = null;
 
 function startDrag(e, pieceEl, shape, index) {
@@ -263,6 +285,8 @@ function startDrag(e, pieceEl, shape, index) {
     // but on desktop we can center it on cursor.
     dragStartX = clientX;
     dragStartY = clientY;
+    lastDragX = clientX;
+    lastDragY = clientY;
 
     moveDraggedPiece(clientX, clientY);
 
@@ -297,9 +321,21 @@ function onDragMove(e) {
         clientY = e.touches[0].clientY;
     }
     
+    lastDragX = clientX;
+    lastDragY = clientY;
+    
     moveDraggedPiece(clientX, clientY);
 
     if (draggedPiece) {
+        // Check highlight for Hold Box
+        const hdRect = holdBox.getBoundingClientRect();
+        if (clientX >= hdRect.left && clientX <= hdRect.right && 
+            clientY >= hdRect.top && clientY <= hdRect.bottom) {
+            holdBox.classList.add('highlight');
+        } else {
+            holdBox.classList.remove('highlight');
+        }
+
         const dropRect = draggedPiece.getBoundingClientRect();
         const gridRect = gridEl.getBoundingClientRect();
         const cellSize = getCellSize();
@@ -324,6 +360,44 @@ function onDragEnd(e) {
     document.removeEventListener('touchend', onDragEnd);
 
     if (!draggedPiece) return;
+    
+    holdBox.classList.remove('highlight');
+    
+    const hdRect = holdBox.getBoundingClientRect();
+    if (lastDragX >= hdRect.left && lastDragX <= hdRect.right && 
+        lastDragY >= hdRect.top && lastDragY <= hdRect.bottom) {
+        
+        clearGhost();
+        playSound('place');
+        
+        const tempShape = heldShape;
+        heldShape = currentShape;
+        renderHeldPiece();
+        
+        if (!tempShape) {
+            availablePieces[dragShapeIndex] = null;
+            originalPieceEl.classList.add('hidden');
+        } else {
+            availablePieces[dragShapeIndex] = tempShape;
+            const slot = piecesTrayEl.children[dragShapeIndex];
+            slot.innerHTML = '';
+            const newPiece = createPieceElement(tempShape, dragShapeIndex);
+            slot.appendChild(newPiece);
+        }
+        
+        if (availablePieces.every(p => p === null)) {
+            generatePieces();
+        } else {
+            checkGameOver();
+        }
+        
+        draggedPiece.remove();
+        draggedPiece = null;
+        currentShape = null;
+        dragShapeIndex = -1;
+        originalPieceEl = null;
+        return;
+    }
 
     // Find where the drop happened relative to the grid
     const dropRect = draggedPiece.getBoundingClientRect();
@@ -481,10 +555,11 @@ function animateAndClearLines(rows, cols, linesCleared) {
     currentCombo++;
     const comboMultiplier = currentCombo;
     const points = basePoints * comboMultiplier;
-
+    
     addScore(points);
     showScorePopup(points, currentCombo);
-
+    spawnCrazyPopup(linesCleared, currentCombo);
+    
     // After animation, clear array and update visuals
     setTimeout(() => {
         rows.forEach(r => {
@@ -513,11 +588,22 @@ function animateAndClearLines(rows, cols, linesCleared) {
 function addScore(points) {
     score += points;
     scoreEl.innerText = score;
-
+    
     if (score > highScore) {
         highScore = score;
         bestScoreEl.innerText = highScore;
         localStorage.setItem('blockBlastHighScore', highScore);
+    }
+    updateShuffleButton();
+}
+
+function updateShuffleButton() {
+    if (!hasUsedShuffle && score >= SHUFFLE_COST) {
+        shuffleBtn.classList.remove('disabled');
+        shuffleBtn.disabled = false;
+    } else {
+        shuffleBtn.classList.add('disabled');
+        shuffleBtn.disabled = true;
     }
 }
 
@@ -609,6 +695,12 @@ function restartGame() {
     score = 0;
     scoreEl.innerText = score;
     gameOverModal.classList.add('hidden');
+    
+    heldShape = null;
+    renderHeldPiece();
+    hasUsedShuffle = false;
+    updateShuffleButton();
+    
     updateGridVisuals();
     generatePieces();
 }
@@ -650,6 +742,68 @@ function triggerShake() {
     void container.offsetWidth;
     container.classList.add('shake');
     setTimeout(() => { container.classList.remove('shake'); }, 300);
+}
+
+function spawnCrazyPopup(lines, combo) {
+    let text = "";
+    let color = "#ffffff";
+    if (lines === 1) { text = "GÜZEL"; color = "#4ade80"; }
+    else if (lines === 2) { text = "HARİKA!"; color = "#38bdf8"; }
+    else if (lines === 3) { text = "MÜKEMMEL!!"; color = "#fb923c"; }
+    else if (lines >= 4) { text = "İNANILMAZ!!!"; color = "#f87171"; }
+    
+    if (combo > 2) {
+        text = `MEGA COMBO X${combo}!`;
+        color = "#f472b6";
+    }
+
+    const popup = document.createElement('div');
+    popup.classList.add('crazy-popup');
+    popup.innerText = text;
+    popup.style.color = color;
+    popup.style.textShadow = `0 0 15px ${color}`;
+    
+    const rot = (Math.random() * 30 - 15) + "deg";
+    popup.style.setProperty('--rot', rot);
+    
+    const rect = gridEl.getBoundingClientRect();
+    popup.style.left = `${rect.left + rect.width/2}px`;
+    popup.style.top = `${rect.top + rect.height/2}px`;
+    
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 1200);
+}
+
+function renderHeldPiece() {
+    heldPieceContainer.innerHTML = '';
+    if (!heldShape) return;
+    
+    const miniPiece = document.createElement('div');
+    miniPiece.style.position = 'relative';
+    
+    const rows = heldShape.layout.length;
+    const cols = heldShape.layout[0].length;
+    const cellSize = 12; // Small for hold box
+    const gap = 2;
+    
+    miniPiece.style.width = `${cols * cellSize + (cols - 1) * gap}px`;
+    miniPiece.style.height = `${rows * cellSize + (rows - 1) * gap}px`;
+    
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            if (heldShape.layout[r][c]) {
+                const block = document.createElement('div');
+                block.classList.add('block-cell', heldShape.color);
+                block.style.position = 'absolute';
+                block.style.width = `${cellSize}px`;
+                block.style.height = `${cellSize}px`;
+                block.style.left = `${c * (cellSize + gap)}px`;
+                block.style.top = `${r * (cellSize + gap)}px`;
+                miniPiece.appendChild(block);
+            }
+        }
+    }
+    heldPieceContainer.appendChild(miniPiece);
 }
 
 function spawnParticles(r, c) {
