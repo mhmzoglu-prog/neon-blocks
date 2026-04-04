@@ -747,10 +747,10 @@ function triggerShake() {
 function spawnCrazyPopup(lines, combo) {
     let text = "";
     let color = "#ffffff";
-    if (lines === 1) { text = "GÜZEL"; color = "#4ade80"; }
-    else if (lines === 2) { text = "HARİKA!"; color = "#38bdf8"; }
-    else if (lines === 3) { text = "MÜKEMMEL!!"; color = "#fb923c"; }
-    else if (lines >= 4) { text = "İNANILMAZ!!!"; color = "#f87171"; }
+    if (lines === 1) { text = "NICE"; color = "#4ade80"; }
+    else if (lines === 2) { text = "GREAT!"; color = "#38bdf8"; }
+    else if (lines === 3) { text = "AWESOME!!"; color = "#fb923c"; }
+    else if (lines >= 4) { text = "PERFECT!!!"; color = "#f87171"; }
     
     if (combo > 2) {
         text = `MEGA COMBO X${combo}!`;
