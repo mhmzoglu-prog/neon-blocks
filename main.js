@@ -778,32 +778,20 @@ function renderHeldPiece() {
     heldPieceContainer.innerHTML = '';
     if (!heldShape) return;
     
-    const miniPiece = document.createElement('div');
-    miniPiece.style.position = 'relative';
+    // Construct real piece so the border-radius proportions match tray pieces
+    const pieceObj = createPieceElement(heldShape, -1);
     
-    const rows = heldShape.layout.length;
-    const cols = heldShape.layout[0].length;
-    const cellSize = 12; // Small for hold box
-    const gap = 2;
+    // Adjust scale slightly smaller to fit the 70x70 hold box perfectly
+    const maxDim = Math.max(heldShape.layout.length, heldShape.layout[0].length);
+    let scaleVal = 0.40;
+    if (maxDim === 4) scaleVal = 0.30;
+    if (maxDim === 5) scaleVal = 0.22;
     
-    miniPiece.style.width = `${cols * cellSize + (cols - 1) * gap}px`;
-    miniPiece.style.height = `${rows * cellSize + (rows - 1) * gap}px`;
+    pieceObj.style.transform = `scale(${scaleVal})`;
     
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            if (heldShape.layout[r][c]) {
-                const block = document.createElement('div');
-                block.classList.add('block-cell', heldShape.color);
-                block.style.position = 'absolute';
-                block.style.width = `${cellSize}px`;
-                block.style.height = `${cellSize}px`;
-                block.style.left = `${c * (cellSize + gap)}px`;
-                block.style.top = `${r * (cellSize + gap)}px`;
-                miniPiece.appendChild(block);
-            }
-        }
-    }
-    heldPieceContainer.appendChild(miniPiece);
+    // Clone it to strip away drag event listeners (Make it purely visual)
+    const visualClone = pieceObj.cloneNode(true);
+    heldPieceContainer.appendChild(visualClone);
 }
 
 function spawnParticles(r, c) {
