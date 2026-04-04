@@ -242,6 +242,7 @@ function startDrag(e, pieceEl, shape, index) {
     // Remove scale so it appears full size
     draggedPiece.style.transform = 'scale(1)';
     draggedPiece.style.margin = '0';
+    draggedPiece.style.opacity = '1'; // Force visible in case of double-fire cloning
 
     dragOverlayEl.appendChild(draggedPiece);
 
