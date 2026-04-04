@@ -203,14 +203,9 @@ function createPieceElement(shape, index) {
     pieceObj.addEventListener('pointerdown', (e) => startDrag(e, pieceObj, shape, index));
     pieceObj.addEventListener('mousedown', (e) => startDrag(e, pieceObj, shape, index));
     pieceObj.addEventListener('touchstart', (e) => {
-        // Prevent default only if we handle it to avoid double-firing
-        // e.preventDefault(); 
-        if (e.touches && e.touches.length > 0) {
-            e.clientX = e.touches[0].clientX;
-            e.clientY = e.touches[0].clientY;
-        }
+        e.preventDefault(); // Prevent double-firing with pointer/mouse events
         startDrag(e, pieceObj, shape, index);
-    });
+    }, { passive: false });
 
     return pieceObj;
 }
@@ -247,16 +242,20 @@ function startDrag(e, pieceEl, shape, index) {
     // Hide original
     originalPieceEl.style.opacity = '0';
 
-    // Calculate cursor offset within the piece
-    // When scaled in the tray, we need to adjust calculating where the mouse grabbed it
-    // The scale in css is 0.6, so the actual drawn size is smaller.
+    // Extract coordinates safely (iOS Safari throws on mutating event object)
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    }
 
     // We want the piece to center slightly above the finger so it's not hidden on mobile,
     // but on desktop we can center it on cursor.
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
+    dragStartX = clientX;
+    dragStartY = clientY;
 
-    moveDraggedPiece(e.clientX, e.clientY);
+    moveDraggedPiece(clientX, clientY);
 
     document.addEventListener('pointermove', onDragMove, { passive: false });
     document.addEventListener('pointerup', onDragEnd);
@@ -280,12 +279,16 @@ function moveDraggedPiece(x, y) {
 }
 
 function onDragMove(e) {
-    e.preventDefault(); // Prevent scrolling on touch
+    if (e.cancelable) e.preventDefault(); // Prevent scrolling on touch
+    
+    let clientX = e.clientX;
+    let clientY = e.clientY;
     if (e.touches && e.touches.length > 0) {
-        e.clientX = e.touches[0].clientX;
-        e.clientY = e.touches[0].clientY;
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
     }
-    moveDraggedPiece(e.clientX, e.clientY);
+    
+    moveDraggedPiece(clientX, clientY);
 
     if (draggedPiece) {
         const dropRect = draggedPiece.getBoundingClientRect();
