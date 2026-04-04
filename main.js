@@ -224,6 +224,14 @@ function startDrag(e, pieceEl, shape, index) {
     e.preventDefault();
     initAudio();
 
+    // Prevent double-firing (pointerdown + touchstart) causing orphaned clones
+    if (draggedPiece) {
+        draggedPiece.remove();
+        draggedPiece = null;
+    }
+    // Deep wipe just to be 100% sure the overlay is clean
+    dragOverlayEl.innerHTML = '';
+
     originalPieceEl = pieceEl;
     currentShape = shape;
     dragShapeIndex = index;
