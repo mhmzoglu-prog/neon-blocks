@@ -241,7 +241,7 @@ let lastDragY = 0;
 let originalPieceEl = null;
 
 function startDrag(e, pieceEl, shape, index) {
-    if (pieceEl.classList.contains('inactive')) return;
+    // Removed inactivity blocker to allow players to drag unplayable pieces into the HOLD box to save themselves!
 
     e.preventDefault();
     initAudio();
@@ -370,19 +370,24 @@ function onDragEnd(e) {
         clearGhost();
         playSound('place');
         
-        const tempShape = heldShape;
-        heldShape = currentShape;
-        renderHeldPiece();
-        
-        if (!tempShape) {
-            availablePieces[dragShapeIndex] = null;
-            originalPieceEl.classList.add('hidden');
+        if (dragShapeIndex === -1) {
+            // Dragged from Hold Box but dropped back on Hold Box. Just snap back.
+            if (originalPieceEl) originalPieceEl.style.opacity = '1';
         } else {
-            availablePieces[dragShapeIndex] = tempShape;
-            const slot = piecesTrayEl.children[dragShapeIndex];
-            slot.innerHTML = '';
-            const newPiece = createPieceElement(tempShape, dragShapeIndex);
-            slot.appendChild(newPiece);
+            const tempShape = heldShape;
+            heldShape = currentShape;
+            renderHeldPiece();
+            
+            if (!tempShape) {
+                availablePieces[dragShapeIndex] = null;
+                originalPieceEl.classList.add('hidden');
+            } else {
+                availablePieces[dragShapeIndex] = tempShape;
+                const slot = piecesTrayEl.children[dragShapeIndex];
+                slot.innerHTML = '';
+                const newPiece = createPieceElement(tempShape, dragShapeIndex);
+                slot.appendChild(newPiece);
+            }
         }
         
         if (availablePieces.every(p => p === null)) {
@@ -421,9 +426,15 @@ function onDragEnd(e) {
         placeShape(currentShape, startRow, startCol);
         playSound('place');
 
-        // Remove from available pieces array
-        availablePieces[dragShapeIndex] = null;
-        originalPieceEl.classList.add('hidden'); // Fully remove visually in slot
+        if (dragShapeIndex !== -1) {
+            // Remove from available pieces array
+            availablePieces[dragShapeIndex] = null;
+            originalPieceEl.classList.add('hidden'); // Fully remove visually in slot
+        } else {
+            // It was dragged from the Hold Box
+            heldShape = null;
+            renderHeldPiece();
+        }
 
         const isClearing = checkForClears();
 
@@ -628,9 +639,11 @@ function showScorePopup(points, combo) {
 
 function checkGameOver() {
     let isGameOver = true;
+    let hasAnyPiece = false;
 
     availablePieces.forEach((shape, index) => {
-        if (!shape) return; // already used
+        if (!shape) return; 
+        hasAnyPiece = true;
 
         let canShapeBePlaced = false;
         const trayPieces = piecesTrayEl.children;
@@ -648,21 +661,35 @@ function checkGameOver() {
 
         if (canShapeBePlaced) {
             isGameOver = false;
-            if (pieceEl) {
-                pieceEl.classList.remove('inactive');
-                // Ensure drag events are not blocked visually
-            }
+            if (pieceEl) pieceEl.classList.remove('inactive');
         } else {
-            if (pieceEl) {
-                pieceEl.classList.add('inactive');
-            }
+            if (pieceEl) pieceEl.classList.add('inactive');
         }
     });
 
+    // Sub-check: If we have an empty Hold box, we can survive by dragging an unplayable piece into it!
+    const hasEmptyHoldBox = (heldShape === null);
+    if (isGameOver && hasAnyPiece && hasEmptyHoldBox) {
+        isGameOver = false;
+    }
+
+    // Sub-check 2: Can the currently held piece be played?
+    if (isGameOver && heldShape) {
+        let canHeldBePlaced = false;
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                if (canPlace(heldShape, r, c)) {
+                    canHeldBePlaced = true;
+                    break;
+                }
+            }
+            if (canHeldBePlaced) break;
+        }
+        if (canHeldBePlaced) isGameOver = false;
+    }
+
     if (isGameOver) {
-        // Double check no pieces can be placed
-        const hasPiecesLeft = availablePieces.some(p => p !== null);
-        if (hasPiecesLeft) {
+        if (hasAnyPiece || heldShape) {
             setTimeout(showGameOver, 500); // small delay
         }
     }
@@ -789,8 +816,19 @@ function renderHeldPiece() {
     
     pieceObj.style.transform = `scale(${scaleVal})`;
     
-    // Clone it to strip away drag event listeners (Make it purely visual)
+    // Clone it to strip away previous slot index interactions
     const visualClone = pieceObj.cloneNode(true);
+    
+    // Re-attach proper drag event listeners so the held piece CAN be played directly!
+    visualClone.style.cursor = 'pointer';
+    visualClone.style.touchAction = 'none';
+    visualClone.addEventListener('pointerdown', (e) => startDrag(e, visualClone, heldShape, -1));
+    visualClone.addEventListener('mousedown', (e) => startDrag(e, visualClone, heldShape, -1));
+    visualClone.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startDrag(e, visualClone, heldShape, -1);
+    }, { passive: false });
+    
     heldPieceContainer.appendChild(visualClone);
 }
 
