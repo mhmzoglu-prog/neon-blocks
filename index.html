@@ -25,17 +25,24 @@
         </header>
 
         <div class="utility-bar">
-            <div id="hold-box" class="hold-box">
+            <div id="hold-box" class="hold-box locked">
                 <span class="box-label">HOLD</span>
                 <div id="held-piece-container"></div>
+                <div class="lock-overlay">
+                    <span class="lock-icon">🔒</span>
+                    <span class="lock-text">10k</span>
+                </div>
             </div>
             <div class="header-icons">
                 <button id="leaderboard-btn" class="top-btn" title="Leaderboard">🏆</button>
                 <button id="mute-btn" class="top-btn" title="Toggle Sound">🎵</button>
             </div>
-            <button id="shuffle-btn" class="shuffle-btn disabled" disabled>
+            <button id="shuffle-btn" class="shuffle-btn locked" disabled>
                 <span class="icon">🔄</span>
-                <span class="shuffle-text">SHUFFLE (3000P)</span>
+                <div class="lock-overlay">
+                    <span class="lock-icon">🔒</span>
+                    <span class="lock-text">20k</span>
+                </div>
             </button>
         </div>
 

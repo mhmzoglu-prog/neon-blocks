@@ -77,8 +77,11 @@ const heldPieceContainer = document.getElementById('held-piece-container');
 const shuffleBtn = document.getElementById('shuffle-btn');
 
 let heldShape = null;
+let isHoldUnlocked = false;
+let isShuffleUnlocked = false;
 let hasUsedShuffle = false;
-const SHUFFLE_COST = 3000;
+const HOLD_UNLOCK_SCORE = 10000;
+const SHUFFLE_UNLOCK_SCORE = 20000;
 
 // Calculate dynamic cell sizes based on CSS
 function getCellSize() {
@@ -650,16 +653,38 @@ function addScore(points) {
         bestScoreEl.innerText = highScore;
         localStorage.setItem('blockBlastHighScore', highScore);
     }
-    updateShuffleButton();
+    checkUnlocks();
+}
+
+function checkUnlocks() {
+    if (!isHoldUnlocked && score >= HOLD_UNLOCK_SCORE) {
+        isHoldUnlocked = true;
+        holdBox.classList.remove('locked');
+        // Play an unlock sound if desired
+    }
+
+    if (!isShuffleUnlocked && score >= SHUFFLE_UNLOCK_SCORE) {
+        isShuffleUnlocked = true;
+        updateShuffleButton();
+    }
 }
 
 function updateShuffleButton() {
-    if (!hasUsedShuffle && score >= SHUFFLE_COST) {
+    if (isShuffleUnlocked && !hasUsedShuffle) {
+        shuffleBtn.classList.remove('locked');
         shuffleBtn.classList.remove('disabled');
         shuffleBtn.disabled = false;
     } else {
-        shuffleBtn.classList.add('disabled');
         shuffleBtn.disabled = true;
+        if (!isShuffleUnlocked) {
+            shuffleBtn.classList.add('locked');
+        } else {
+            // Already unlocked but used up. Make it look disabled but don't show the score lock
+            shuffleBtn.classList.remove('locked');
+            shuffleBtn.classList.add('disabled');
+            shuffleBtn.style.filter = 'grayscale(1)';
+            shuffleBtn.style.opacity = '0.5';
+        }
     }
 }
 
@@ -768,8 +793,12 @@ function restartGame() {
     gameOverModal.classList.add('hidden');
     
     heldShape = null;
-    renderHeldPiece();
+    isHoldUnlocked = false;
+    isShuffleUnlocked = false;
     hasUsedShuffle = false;
+    
+    holdBox.classList.add('locked');
+    renderHeldPiece();
     updateShuffleButton();
     
     updateGridVisuals();
