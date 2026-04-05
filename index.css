@@ -57,6 +57,8 @@ body {
 
 header {
     width: 100%;
+    max-width: var(--board-size);
+    margin: 0 auto;
     position: relative;
 }
 
@@ -65,7 +67,6 @@ header {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 0 10px;
 }
 
 .title {
@@ -79,8 +80,8 @@ header {
     -webkit-text-fill-color: transparent;
     text-align: center;
     white-space: nowrap;
-    flex-shrink: 1;
-    min-width: 0;
+    flex: 1;
+    padding: 0 8px;
 }
 
 .score-card {
@@ -88,24 +89,20 @@ header {
     flex-direction: column;
     align-items: center;
     background: rgba(30, 41, 59, 0.7);
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.header-icons {
-    display: flex;
-    gap: 6px;
-    align-items: center;
+    flex-shrink: 0;
 }
 
 .score-card .label {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--text-secondary);
     font-weight: 500;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    letter-spacing: 1px;
 }
 
 .score-card .value {
@@ -248,7 +245,7 @@ footer {
     justify-content: space-evenly;
     align-items: center;
     width: 100%;
-    max-width: 420px;
+    max-width: var(--board-size);
     margin: 0 auto;
     height: calc((var(--cell-size) * 4) + 20px);
     background: rgba(30, 41, 59, 0.4);
@@ -494,14 +491,33 @@ footer {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    max-width: 420px;
+    max-width: var(--board-size);
     margin: 0 auto;
-    padding: 0 10px;
+}
+
+.header-icons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.header-icons .top-btn {
+    font-size: 1.4rem;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.header-icons .top-btn:hover {
+    transform: scale(1.1);
 }
 
 .hold-box {
-    flex: 0 0 55px;
-    height: 55px;
+    flex: 0 0 50px;
+    height: 50px;
     background: rgba(15, 23, 42, 0.6);
     border: 2px dashed rgba(255, 255, 255, 0.2);
     border-radius: 10px;
@@ -522,13 +538,13 @@ footer {
 
 .box-label {
     position: absolute;
-    top: -18px;
-    left: 2px;
-    font-size: 0.70rem;
+    top: 2px;
+    font-size: 0.5rem;
     font-weight: 700;
     color: var(--text-secondary);
     letter-spacing: 1px;
     z-index: 5;
+    opacity: 0.7;
 }
 
 #held-piece-container {
