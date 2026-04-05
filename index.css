@@ -161,7 +161,6 @@ main {
     height: var(--cell-size);
     background-color: var(--cell-bg);
     border-radius: 6px;
-    transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.3s ease;
 }
 
 /* Base styles for filled cells / parts of blocks */

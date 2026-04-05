@@ -290,6 +290,11 @@ function startDrag(e, pieceEl, shape, index) {
     // Create clone for dragging
     draggedPiece = pieceEl.cloneNode(true);
     draggedPiece.style.position = 'absolute';
+    // Base position 0,0 so translate3d operates in global screen coordinates
+    draggedPiece.style.left = '0px';
+    draggedPiece.style.top = '0px';
+    // Force a dedicated GPU layer. This prevents the "black smearing/trailing" glitch on iOS Safari
+    draggedPiece.style.willChange = 'transform';
     // Remove scale so it appears full size
     draggedPiece.style.transform = 'scale(1)';
     draggedPiece.style.margin = '0';
@@ -336,8 +341,8 @@ function moveDraggedPiece(x, y) {
     const isMobile = window.innerWidth <= 768;
     const yOffset = isMobile ? pieceHeight + 50 : pieceHeight / 2;
 
-    draggedPiece.style.left = `${x - pieceWidth / 2}px`;
-    draggedPiece.style.top = `${y - yOffset}px`;
+    // Use translate3d instead of left/top to avoid layout thrashing and iOS smearing bugs
+    draggedPiece.style.transform = `translate3d(${x - pieceWidth / 2}px, ${y - yOffset}px, 0) scale(1)`;
 }
 
 function onDragMove(e) {
