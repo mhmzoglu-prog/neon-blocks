@@ -131,9 +131,8 @@ function autoSizeCells() {
     const vh = window.innerHeight;
     const vw = window.innerWidth;
 
-    // Estimate non-grid vertical space:
-    // header (~70px) + utility bar (~90px) + tray (~120px) + gaps/padding (~80px)
-    const reservedVertical = 360;
+    // Estimate non-grid vertical space (compact header + utility bar + tray + gaps)
+    const reservedVertical = 280;
     const availableForGrid = vh - reservedVertical;
 
     // Grid needs: 8 cells + 7 gaps + 2*gap padding
@@ -700,13 +699,7 @@ function checkGameOver() {
         }
     });
 
-    // Sub-check: If we have an empty Hold box, we can survive by dragging an unplayable piece into it!
-    const hasEmptyHoldBox = (heldShape === null);
-    if (isGameOver && hasAnyPiece && hasEmptyHoldBox) {
-        isGameOver = false;
-    }
-
-    // Sub-check 2: Can the currently held piece be played?
+    // Can the currently held piece be played?
     if (isGameOver && heldShape) {
         let canHeldBePlaced = false;
         for (let r = 0; r < GRID_SIZE; r++) {
@@ -723,7 +716,7 @@ function checkGameOver() {
 
     if (isGameOver) {
         if (hasAnyPiece || heldShape) {
-            setTimeout(showGameOver, 500); // small delay
+            setTimeout(showGameOver, 500);
         }
     }
 }

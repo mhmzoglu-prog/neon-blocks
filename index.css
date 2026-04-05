@@ -62,14 +62,16 @@ header {
 
 .score-board {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
+    justify-content: center;
+    align-items: center;
     width: 100%;
-    padding: 0 10px;
+    padding: 0 5px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .title {
-    font-size: 1.8rem;
+    font-size: clamp(1rem, 4vw, 1.6rem);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -78,6 +80,7 @@ header {
     background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
+    white-space: nowrap;
 }
 
 .score-card {
@@ -85,22 +88,28 @@ header {
     flex-direction: column;
     align-items: center;
     background: rgba(30, 41, 59, 0.7);
-    padding: 8px 16px;
-    border-radius: 12px;
+    padding: 4px 10px;
+    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
+.header-icons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
 .score-card .label {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: var(--text-secondary);
     font-weight: 500;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .score-card .value {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -486,16 +495,16 @@ footer {
     align-items: center;
     width: 100%;
     max-width: 420px;
-    margin: 0 auto max(5px, 1.5vh) auto;
+    margin: 0 auto;
     padding: 0 10px;
 }
 
 .hold-box {
-    flex: 0 0 70px;
-    height: 70px;
+    flex: 0 0 55px;
+    height: 55px;
     background: rgba(15, 23, 42, 0.6);
     border: 2px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     justify-content: center;

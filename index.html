@@ -10,10 +10,6 @@
 <body>
     <div id="game-container">
         <header>
-            <div class="top-controls" style="display: flex; justify-content: flex-end; width: 100%; padding: 0 10px; margin-bottom: 5px; gap: 10px;">
-                <button id="leaderboard-btn" class="top-btn" title="Leaderboard">🏆</button>
-                <button id="mute-btn" class="top-btn" title="Toggle Sound">🎵</button>
-            </div>
             <div class="score-board">
                 <div class="score-card">
                     <span class="label">SCORE</span>
@@ -23,6 +19,10 @@
                 <div class="score-card high-score">
                     <span class="label">BEST</span>
                     <span id="best-score" class="value">0</span>
+                </div>
+                <div class="header-icons">
+                    <button id="leaderboard-btn" class="top-btn" title="Leaderboard">🏆</button>
+                    <button id="mute-btn" class="top-btn" title="Toggle Sound">🎵</button>
                 </div>
             </div>
             <div id="score-popup" class="hidden"></div>
