@@ -82,11 +82,8 @@ const SHUFFLE_COST = 3000;
 
 // Calculate dynamic cell sizes based on CSS
 function getCellSize() {
-    const defaultCellSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 40;
-    // Calculate actual cell size on screen
-    const firstCell = gridEl.querySelector('.grid-cell');
-    if (firstCell) return firstCell.getBoundingClientRect().width;
-    return defaultCellSize;
+    // Always read from CSS variable for consistency (DOM measurement can be stale on mobile)
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 40;
 }
 
 function getGridGap() {
@@ -834,7 +831,15 @@ function spawnCrazyPopup(lines, combo) {
 
 function renderHeldPiece() {
     heldPieceContainer.innerHTML = '';
-    if (!heldShape) return;
+    const label = holdBox.querySelector('.box-label');
+    
+    if (!heldShape) {
+        if (label) label.style.display = '';
+        return;
+    }
+    
+    // Hide "HOLD" label when a piece is stored
+    if (label) label.style.display = 'none';
     
     // Construct real piece so the border-radius proportions match tray pieces
     const pieceObj = createPieceElement(heldShape, -1);
