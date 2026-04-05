@@ -80,7 +80,7 @@ let heldShape = null;
 let isHoldUnlocked = false;
 let isShuffleUnlocked = false;
 let hasUsedShuffle = false;
-const HOLD_UNLOCK_SCORE = 10000;
+const HOLD_UNLOCK_SCORE = 5000;
 const SHUFFLE_UNLOCK_SCORE = 20000;
 
 // Calculate dynamic cell sizes based on CSS
