@@ -96,6 +96,7 @@ function getGridGap() {
 
 // Initialization
 function init() {
+    autoSizeCells(); // Fit game to any screen
     bestScoreEl.innerText = highScore;
     createGrid();
     generatePieces();
@@ -114,7 +115,39 @@ function init() {
         generatePieces();
     });
     
-    window.addEventListener('resize', () => { /* Redraw or resize calculations if needed */ });
+    window.addEventListener('resize', () => { autoSizeCells(); });
+}
+
+/**
+ * Dynamically calculate the ideal --cell-size so the entire game
+ * fits perfectly within the visible viewport on ANY device.
+ * Works on iPhone SE, iPhone 14, iPhone 16 Pro Max, iPads, Android, desktop.
+ */
+function autoSizeCells() {
+    const root = document.documentElement;
+    const gap = 4; // --grid-gap
+
+    // Measure real available viewport height (respects Safari bars, notches, etc.)
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+
+    // Estimate non-grid vertical space:
+    // header (~70px) + utility bar (~90px) + tray (~120px) + gaps/padding (~80px)
+    const reservedVertical = 360;
+    const availableForGrid = vh - reservedVertical;
+
+    // Grid needs: 8 cells + 7 gaps + 2*gap padding
+    const maxCellFromHeight = Math.floor((availableForGrid - 7 * gap - 2 * gap) / 8);
+
+    // Also limit by width: grid + padding shouldn't exceed screen
+    const maxWidth = Math.min(vw - 40, 500 - 40); // container max-width minus padding
+    const maxCellFromWidth = Math.floor((maxWidth - 7 * gap - 2 * gap) / 8);
+
+    // Take the smaller of both constraints, clamp to sane range
+    let cellSize = Math.min(maxCellFromHeight, maxCellFromWidth);
+    cellSize = Math.max(18, Math.min(cellSize, 48)); // never smaller than 18, never bigger than 48
+
+    root.style.setProperty('--cell-size', cellSize + 'px');
 }
 
 function createGrid() {
