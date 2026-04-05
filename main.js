@@ -699,6 +699,11 @@ function checkGameOver() {
         }
     });
 
+    // If hold box is empty, the player can stash an unplayable piece to trigger new pieces
+    if (isGameOver && hasAnyPiece && heldShape === null) {
+        isGameOver = false;
+    }
+
     // Can the currently held piece be played?
     if (isGameOver && heldShape) {
         let canHeldBePlaced = false;
