@@ -297,6 +297,8 @@ function startDrag(e, pieceEl, shape, index) {
     draggedPiece.style.willChange = 'transform';
     // Remove scale so it appears full size
     draggedPiece.style.transform = 'scale(1)';
+    // Crucial: remove CSS transition from the dragged clone so it bounds instantly to the finger pointer without jitter
+    draggedPiece.style.transition = 'none';
     draggedPiece.style.margin = '0';
     draggedPiece.style.opacity = '1'; // Force visible in case of double-fire cloning
 
