@@ -737,8 +737,8 @@ function checkGameOver() {
         }
     });
 
-    // If hold box is empty, the player can stash an unplayable piece to trigger new pieces
-    if (isGameOver && hasAnyPiece && heldShape === null) {
+    // If hold box is empty AND unlocked, the player can stash an unplayable piece to trigger new pieces
+    if (isGameOver && hasAnyPiece && heldShape === null && isHoldUnlocked) {
         isGameOver = false;
     }
 
