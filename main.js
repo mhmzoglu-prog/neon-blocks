@@ -363,16 +363,21 @@ function onDragMove(e) {
     moveDraggedPiece(clientX, clientY);
 
     if (draggedPiece) {
-        // Check highlight for Hold Box
         const hdRect = holdBox.getBoundingClientRect();
-        if (clientX >= hdRect.left && clientX <= hdRect.right && 
-            clientY >= hdRect.top && clientY <= hdRect.bottom) {
+        const dropRect = draggedPiece.getBoundingClientRect();
+        
+        // Check if the dragged piece overlaps with the Hold Box
+        const intersectsHold = !(dropRect.right < hdRect.left || 
+                                 dropRect.left > hdRect.right || 
+                                 dropRect.bottom < hdRect.top || 
+                                 dropRect.top > hdRect.bottom);
+        
+        if (intersectsHold) {
             holdBox.classList.add('highlight');
         } else {
             holdBox.classList.remove('highlight');
         }
 
-        const dropRect = draggedPiece.getBoundingClientRect();
         const gridRect = gridEl.getBoundingClientRect();
         const cellSize = getCellSize();
         const gap = getGridGap();
@@ -400,8 +405,13 @@ function onDragEnd(e) {
     holdBox.classList.remove('highlight');
     
     const hdRect = holdBox.getBoundingClientRect();
-    if (lastDragX >= hdRect.left && lastDragX <= hdRect.right && 
-        lastDragY >= hdRect.top && lastDragY <= hdRect.bottom) {
+    const dropRect = draggedPiece.getBoundingClientRect();
+    const intersectsHold = !(dropRect.right < hdRect.left || 
+                             dropRect.left > hdRect.right || 
+                             dropRect.bottom < hdRect.top || 
+                             dropRect.top > hdRect.bottom);
+
+    if (intersectsHold) {
         
         clearGhost();
         playSound('place');
@@ -441,7 +451,6 @@ function onDragEnd(e) {
     }
 
     // Find where the drop happened relative to the grid
-    const dropRect = draggedPiece.getBoundingClientRect();
     const gridRect = gridEl.getBoundingClientRect();
 
     const cellSize = getCellSize();
