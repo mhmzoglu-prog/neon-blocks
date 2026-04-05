@@ -369,8 +369,8 @@ function onDragMove(e) {
         const hdRect = holdBox.getBoundingClientRect();
         const dropRect = draggedPiece.getBoundingClientRect();
         
-        // Check if the dragged piece overlaps with the Hold Box
-        const intersectsHold = !(dropRect.right < hdRect.left || 
+        // Check if the dragged piece overlaps with the Hold Box and it's unlocked
+        const intersectsHold = isHoldUnlocked && !(dropRect.right < hdRect.left || 
                                  dropRect.left > hdRect.right || 
                                  dropRect.bottom < hdRect.top || 
                                  dropRect.top > hdRect.bottom);
@@ -409,7 +409,7 @@ function onDragEnd(e) {
     
     const hdRect = holdBox.getBoundingClientRect();
     const dropRect = draggedPiece.getBoundingClientRect();
-    const intersectsHold = !(dropRect.right < hdRect.left || 
+    const intersectsHold = isHoldUnlocked && !(dropRect.right < hdRect.left || 
                              dropRect.left > hdRect.right || 
                              dropRect.bottom < hdRect.top || 
                              dropRect.top > hdRect.bottom);
